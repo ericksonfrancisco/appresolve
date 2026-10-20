@@ -1,20 +1,13 @@
-import {
-    createUserWithEmailAndPassword,
-} from 'firebase/auth';
+import { createUserWithEmailAndPassword,} from 'firebase/auth';
  
-import {
-    ref,
-    set,
-} from 'firebase/database';
+import { ref, set, } from 'firebase/database';
  
-import {
-    auth,
-    database,
-} from './firebaseConfig';
+import {auth, database,} from './firebaseConfig';
  
-import {
-    UserModel,
-} from '../models/UserModel';
+import { UserModel,} from '../models/UserModel';
+
+
+
 //cadastrar no database do firebase
 class UserService {
     async cadastrarUsuario(
