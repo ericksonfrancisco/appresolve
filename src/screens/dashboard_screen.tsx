@@ -6,6 +6,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 
 // Importação da tela de Profissionais
 import ProfissionalScreen from './profissional_screen';
+import ListarServicosScreen from './listar_servicos_screen';
 
 const Tab = createBottomTabNavigator();
 
@@ -50,27 +51,7 @@ function HomeScreen() {
   );
 }
 
-function ListarApiScreen() {
-  return (
-    <ScrollView
-      style={styles.tabContainer}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <Text style={styles.pageTitle}>Dados da API</Text>
-      <Text style={styles.subtitle}>Integração e dados recebidos</Text>
 
-      <View style={styles.apiCard}>
-        <Text style={styles.apiEndpoint}>GET /api/v1/profissionais</Text>
-        <Text style={styles.apiStatus}>Status: 200 OK</Text>
-      </View>
-
-      <View style={styles.apiCard}>
-        <Text style={styles.apiEndpoint}>GET /api/v1/orcamentos</Text>
-        <Text style={styles.apiStatus}>Status: 200 OK</Text>
-      </View>
-    </ScrollView>
-  );
-}
 
 function SairScreen({ navigation }: any) {
   const handleLogout = () => {
@@ -142,8 +123,8 @@ export default function DashboardScreen() {
               iconName = 'home-outline';
             } else if (route.name === 'Profissional') {
               iconName = 'briefcase-outline';
-            } else if (route.name === 'ListarApi') {
-              iconName = 'cloud-outline';
+            } else if (route.name === 'Serviços') {
+              iconName = 'build-outline';
             } else if (route.name === 'Sair') {
               iconName = 'log-out-outline';
             }
@@ -154,7 +135,7 @@ export default function DashboardScreen() {
       >
         <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Home' }} />
         <Tab.Screen name="Profissional" component={ProfissionalScreen} options={{ tabBarLabel: 'Profissionais' }} />
-        <Tab.Screen name="ListarApi" component={ListarApiScreen} options={{ tabBarLabel: 'API' }} />
+        <Tab.Screen name="Serviços" component={ListarServicosScreen} options={{ tabBarLabel: 'Serviços' }} />
         <Tab.Screen name="Sair" component={SairScreen} options={{ tabBarLabel: 'Sair' }} />
       </Tab.Navigator>
     </View>
@@ -209,7 +190,7 @@ const styles = StyleSheet.create({
   },
   infoTitle: { color: '#6C757D', fontSize: 12 },
   infoText: { color: '#123E7A', fontSize: 16, fontWeight: '600', marginTop: 4 },
-  apiCard: {
+  servicoCard: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E9ECEF',
@@ -217,8 +198,8 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 12,
   },
-  apiEndpoint: { fontSize: 14, fontWeight: '700', color: '#123E7A' },
-  apiStatus: { fontSize: 12, color: '#28A745', marginTop: 4, fontWeight: '600' },
+  servicoEndpoint: { fontSize: 14, fontWeight: '700', color: '#123E7A' },
+  servicoStatus: { fontSize: 12, color: '#28A745', marginTop: 4, fontWeight: '600' },
   logoutContainer: { flex: 1, backgroundColor: '#F8F9FA', justifyContent: 'center', alignItems: 'center', padding: 28 },
   logoutTitle: { fontSize: 22, fontWeight: '700', color: '#123E7A', marginBottom: 8 },
   logoutSubtitle: { fontSize: 14, color: '#6C757D', textAlign: 'center', marginBottom: 32 },

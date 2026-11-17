@@ -53,6 +53,8 @@ export default function ProfissionalScreen() {
   const [endereco, setEndereco] = useState('');
   const [atividadesSelecionadas, setAtividadesSelecionadas] = useState<string[]>([]);
 
+  const [erros, setErros] = useState<Record<string, string>>({});
+
   const [loading, setLoading] = useState(false);
 
   // Estados para controle dos Modais
@@ -93,6 +95,7 @@ export default function ProfissionalScreen() {
     setEndereco('');
     setAtividadesSelecionadas([]);
     setIdEmEdicao(null);
+    setErros({}); // Limpa os erros também
   };
 
   // ==================================================
@@ -108,12 +111,9 @@ export default function ProfissionalScreen() {
   };
 
   const aplicarMascaraRG = (value: string) => {
-    const apenasValidos = value.replace(/[^0-9xX]/g, '').slice(0, 9);
-    const rgFormatado = apenasValidos
-      .replace(/(\d{2})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})([0-9xX]{1,2})$/, '$1-$2');
-    setRg(rgFormatado.toUpperCase());
+    // Permite apenas números e letras, limitando a 12 caracteres (sem traços/pontos fixos)
+    const rgLimpo = value.replace(/[^0-9a-zA-Z]/g, '').slice(0, 12);
+    setRg(rgLimpo.toUpperCase());
   };
 
   const aplicarMascaraTelefone = (value: string) => {
@@ -188,17 +188,25 @@ export default function ProfissionalScreen() {
   };
 
   const handleCadastrar = async () => {
-    if (
-      !nome.trim() ||
-      !cpf.trim() ||
-      !rg.trim() ||
-      !telefone.trim() ||
-      !cep.trim() ||
-      !endereco.trim() ||
-      atividadesSelecionadas.length === 0
-    ) {
-      return;
+    // Monta o objeto para validar
+    const dadosValidacao = {
+      nome,
+      cpf,
+      rg,
+      telefone,
+      endereco,
+      atividadeProfissional: atividadesSelecionadas,
+    };
+
+    // Chama a validação completa do Service
+    const validacao = ProfissionalService.validarCampos(dadosValidacao as any);
+
+    if (!validacao.valido) {
+      setErros(validacao.erros);
+      return; // Para a execução se houver erros
     }
+
+    setErros({}); // Limpa os erros se estiver tudo válido
 
     try {
       setLoading(true);
@@ -425,21 +433,25 @@ export default function ProfissionalScreen() {
           <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
             <Text style={styles.label}>CPF *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, erros.cpf ? { borderColor: '#DC3545' } : null]}
               placeholder="000.000.000-00"
               placeholderTextColor="#A0A5A8"
               keyboardType="numeric"
               maxLength={14}
               value={cpf}
-              onChangeText={aplicarMascaraCPF}
+              onChangeText={(text) => {
+                aplicarMascaraCPF(text);
+                if (erros.cpf) setErros({ ...erros, cpf: '' }); // Limpa o erro ao digitar
+              }}
             />
+            {erros.cpf ? <Text style={{ color: '#DC3545', fontSize: 11, marginTop: 4 }}>{erros.cpf}</Text> : null}
           </View>
 
           <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
             <Text style={styles.label}>RG *</Text>
             <TextInput
               style={styles.input}
-              placeholder="00.000.000-0"
+              placeholder="Ex: 12345678X"
               placeholderTextColor="#A0A5A8"
               autoCapitalize="characters"
               maxLength={12}

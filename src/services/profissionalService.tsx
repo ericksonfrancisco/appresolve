@@ -6,10 +6,42 @@ export type ErrosProfissional = Partial<
   Record<keyof ProfissionalModel, string>
 >;
 
+// Função auxiliar para validar o algoritmo do CPF (dígitos verificadores)
+function validarCPF(cpf: string): boolean {
+  const cpfLimpo = cpf.replace(/\D/g, '');
+
+  if (cpfLimpo.length !== 11) return false;
+
+  // Rejeita CPFs com todos os dígitos repetidos (ex: 111.111.111-11)
+  if (/^(\d)\1+$/.test(cpfLimpo)) return false;
+
+  let soma = 0;
+  let resto: number;
+
+  // Validação do 1º dígito verificador
+  for (let i = 1; i <= 9; i++) {
+    soma += parseInt(cpfLimpo.substring(i - 1, i)) * (11 - i);
+  }
+  resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(cpfLimpo.substring(9, 10))) return false;
+
+  soma = 0;
+  // Validação do 2º dígito verificador
+  for (let i = 1; i <= 10; i++) {
+    soma += parseInt(cpfLimpo.substring(i - 1, i)) * (12 - i);
+  }
+  resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(cpfLimpo.substring(10, 11))) return false;
+
+  return true;
+}
+
 export class ProfissionalService {
   static validarCampos(
     dados: ProfissionalModel
-  ): { valido: boolean; erros: ErrosProfissional } {      
+  ): { valido: boolean; erros: ErrosProfissional } {
     const erros: ErrosProfissional = {};
 
     if (!dados.nome?.trim()) {
@@ -23,8 +55,8 @@ export class ProfissionalService {
     ) {
       erros.cpf = 'Campo obrigatório.';
     } else {
-      const cpfNumeros = String(dados.cpf).replace(/\D/g, '');
-      if (cpfNumeros.length !== 11) {
+      // Validação completa de tamanho e dígitos verificadores
+      if (!validarCPF(String(dados.cpf))) {
         erros.cpf = 'Informe um CPF válido.';
       }
     }
@@ -36,8 +68,9 @@ export class ProfissionalService {
     ) {
       erros.rg = 'Campo obrigatório.';
     } else {
-      const rgLimpo = String(dados.rg).replace(/[^0-9xX]/g, '');
-      if (rgLimpo.length < 7) {
+      // Aceita números e letras (A-Z, a-z), removendo caracteres especiais
+      const rgLimpo = String(dados.rg).replace(/[^0-9a-zA-Z]/g, '');
+      if (rgLimpo.length < 5) { // Ajuste o tamanho mínimo conforme sua necessidade (ex: 5 ou 7)
         erros.rg = 'Informe um RG válido.';
       }
     }
@@ -157,8 +190,6 @@ export class ProfissionalService {
     }
   }
 
-  // Excluir profissional no Firebase Realtime Database
-  
   // Excluir profissional no Firebase Realtime Database
   static async eliminar(id: string): Promise<boolean> {
     if (!id || !id.trim()) {
