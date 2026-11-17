@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { Servicos } from '../models/Servicos';
  
 interface Props {
@@ -20,14 +20,6 @@ export default function ServicosCard({ servicos }: Props) {
 <View style={styles.infoContainer}>
 <Text style={styles.nome}>
           {servicos.nome ? servicos.nome.toUpperCase() : 'SEM NOME'}
-</Text>
- 
-        <Text style={styles.descricao}>
-          {servicos.descricao || 'Sem nome'}
-</Text>
- 
-        <Text numberOfLines={2} style={styles.descricao}>
-          {servicos.descricao || 'Sem descrição'}
 </Text>
 </View>
 </View>

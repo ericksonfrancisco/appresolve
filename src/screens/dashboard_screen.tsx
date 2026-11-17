@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
 
 // Importação da tela de Profissionais
 import ProfissionalScreen from './profissional_screen';
@@ -54,7 +55,22 @@ function HomeScreen() {
 
 
 function SairScreen({ navigation }: any) {
+  const executarLogout = () => {
+    const rootNav = navigation.getParent() || navigation;
+    rootNav.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  };
+
   const handleLogout = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Deseja realmente sair da sua conta?')) {
+        executarLogout();
+      }
+      return;
+    }
+
     Alert.alert(
       'Sair',
       'Deseja realmente sair da sua conta?',
@@ -63,9 +79,7 @@ function SairScreen({ navigation }: any) {
         {
           text: 'Sair',
           style: 'destructive',
-          onPress: () => {
-            navigation.getParent()?.navigate('Login');
-          },
+          onPress: executarLogout,
         },
       ]
     );

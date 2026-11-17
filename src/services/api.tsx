@@ -2,31 +2,28 @@ import axios from 'axios';
 import { API_KEY, URL } from '../constants/config';
 import { JSONBinResponse, Servicos } from '../models/Servicos';
 
+// Função auxiliar para extrair o array mesmo se houver múltiplos níveis de "record"
+function extrairArrayServicos(obj: any): Servicos[] {
+  if (!obj) return [];
+  if (Array.isArray(obj)) return obj;
+  if (obj.record) return extrairArrayServicos(obj.record);
+  
+  const arrayEncontrado = Object.values(obj).find((val) => Array.isArray(val));
+  return Array.isArray(arrayEncontrado) ? arrayEncontrado : [];
+}
+
 export const getServicos = async (): Promise<Servicos[]> => {
   try {
     const response = await axios.get<JSONBinResponse>(URL, {
       headers: {
         'X-Master-Key': API_KEY,
-        'Content-Type': 'application/json',
       },
     });
 
-    console.log('CONTEÚDO RECEBIDO DO JSONBIN:', response.data);
-
-    const data = response.data;
-
-    // Tenta encontrar o array em qualquer estrutura possível que o JSONBin retorne
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data.record)) return data.record;
-    if (data.record?.record && Array.isArray(data.record.record)) return data.record.record;
-    
-    // Se os dados estiverem salvos em outro formato de objeto, tenta achar qualquer propriedade que seja array
-    const possibleArray = Object.values(data.record || {}).find(val => Array.isArray(val));
-    if (Array.isArray(possibleArray)) return possibleArray;
-
-    return [];
+    console.log('CONTEÚDO RECEBIDO DO JSONBIN:', JSON.stringify(response.data));
+    return extrairArrayServicos(response.data);
   } catch (error: any) {
-    console.log('ERRO GET:', error.message);
+    console.log('ERRO GET:', error.response?.data || error.message);
     throw new Error('Erro ao carregar serviços');
   }
 };
@@ -35,11 +32,7 @@ export const saveServicosAPI = async (servicos: Servicos[]) => {
   try {
     await axios.put(
       URL,
-      { 
-        record: { 
-          record: servicos 
-        } 
-      },
+      { record: servicos },
       {
         headers: {
           'X-Master-Key': API_KEY,
@@ -48,7 +41,7 @@ export const saveServicosAPI = async (servicos: Servicos[]) => {
       }
     );
   } catch (error: any) {
-    console.log('ERRO SALVAR:', error.message);
+    console.log('ERRO SALVAR:', error.response?.data || error.message);
     throw new Error('Erro ao salvar serviços');
   }
 };

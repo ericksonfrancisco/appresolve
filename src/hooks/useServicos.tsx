@@ -49,7 +49,9 @@ export function useServicos() {
 
   const removeServico = async (id: string) => {
     try {
-      const listaAtualizada = servicos.filter((item) => item.id !== id);
+      const listaAtualizada = servicos.filter(
+        (item) => String(item.id) !== String(id)
+      );
       await saveServicosAPI(listaAtualizada);
       setServicos(listaAtualizada);
     } catch (err) {

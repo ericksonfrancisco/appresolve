@@ -5,6 +5,7 @@ import {
   Alert,
   FlatList,
   Modal,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -66,7 +67,37 @@ export default function HomeScreen() {
     }
   };
 
+  const executarExclusao = async (item: any) => {
+    try {
+      await removeServico(item.id);
+      if (Platform.OS === 'web') {
+        window.alert('Serviço excluído com sucesso!');
+      } else {
+        Alert.alert('Sucesso', 'Serviço excluído com sucesso!');
+      }
+    } catch (err) {
+      if (Platform.OS === 'web') {
+        window.alert('Não foi possível excluir o serviço.');
+      } else {
+        Alert.alert('Erro', 'Não foi possível excluir o serviço.');
+      }
+    }
+  };
+
   const handleDelete = (item: any) => {
+    if (!item?.id) {
+      const msg = 'Este serviço não possui um ID válido no JSONBin para ser excluído.';
+      Platform.OS === 'web' ? window.alert(msg) : Alert.alert('Erro', msg);
+      return;
+    }
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Deseja realmente excluir "${item.nome}"?`)) {
+        executarExclusao(item);
+      }
+      return;
+    }
+
     Alert.alert(
       'Excluir Serviço',
       `Deseja realmente excluir "${item.nome}"?`,
@@ -75,14 +106,7 @@ export default function HomeScreen() {
         {
           text: 'Excluir',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await removeServico(item.id);
-              Alert.alert('Sucesso', 'Serviço excluído com sucesso!');
-            } catch (err) {
-              Alert.alert('Erro', 'Não foi possível excluir o serviço.');
-            }
-          },
+          onPress: () => executarExclusao(item),
         },
       ]
     );
