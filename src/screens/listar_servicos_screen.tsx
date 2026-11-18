@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import ServicosCard from '../components/ServicosCard';
 import { useServicos } from '../hooks/useServicos';
+import { dispararNotificacaoLocal } from '../services/notificationService';
 
 export default function HomeScreen() {
   const { servicos, loading, error, addServico, editServico, removeServico } = useServicos();
@@ -53,13 +54,17 @@ export default function HomeScreen() {
 
     try {
       if (isEditing && currentId) {
-        // Atualizar serviço existente
         await editServico(currentId, { nome, imagem });
-        Alert.alert('Sucesso', 'Serviço atualizado com sucesso!');
+        await dispararNotificacaoLocal(
+          'Edição concluída',
+          'Edição concluída com sucesso!'
+        );
       } else {
-        // Criar novo serviço
         await addServico({ nome, imagem });
-        Alert.alert('Sucesso', 'Serviço adicionado com sucesso!');
+        await dispararNotificacaoLocal(
+          'Cadastro realizado',
+          'Cadastro realizado com sucesso!'
+        );
       }
       setModalVisible(false);
     } catch (err) {
@@ -70,11 +75,10 @@ export default function HomeScreen() {
   const executarExclusao = async (item: any) => {
     try {
       await removeServico(item.id);
-      if (Platform.OS === 'web') {
-        window.alert('Serviço excluído com sucesso!');
-      } else {
-        Alert.alert('Sucesso', 'Serviço excluído com sucesso!');
-      }
+      await dispararNotificacaoLocal(
+        'Exclusão concluída',
+        'Exclusão feita com sucesso!'
+      );
     } catch (err) {
       if (Platform.OS === 'web') {
         window.alert('Não foi possível excluir o serviço.');
